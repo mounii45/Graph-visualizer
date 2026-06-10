@@ -1,0 +1,356 @@
+/* ── reset & base ──────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:           #0d1117;
+  --panel:        #161b22;
+  --border:       #30363d;
+  --node:         #21262d;
+  --node-stroke:  #58a6ff;
+  --node-text:    #e6edf3;
+  --edge:         #30363d;
+  --edge-text:    #8b949e;
+  --visited:      #1f6feb;
+  --in-queue:     #388bfd;
+  --final-path:   #f78166;
+  --mst-edge:     #3fb950;
+  --start-node:   #d29922;
+  --highlight:    #a371f7;
+  --text-primary: #e6edf3;
+  --text-muted:   #8b949e;
+  --green:        #3fb950;
+  --orange:       #d29922;
+  --red:          #f85149;
+  --font:         'JetBrains Mono', 'Fira Code', monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font);
+}
+
+/* ── app shell ─────────────────────────────────────────────────────────────── */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font);
+}
+
+/* ── header ────────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--node-stroke);
+}
+
+.algo-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.algo-tab {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+
+.algo-tab.active {
+  border-color: var(--node-stroke);
+  background: #1f3a5f;
+  color: var(--node-stroke);
+}
+
+.header-meta {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── main layout ───────────────────────────────────────────────────────────── */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── canvas area ───────────────────────────────────────────────────────────── */
+.canvas-area {
+  flex: 1;
+  position: relative;
+}
+
+.canvas-svg {
+  min-height: 460px;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-svg.edge-mode {
+  cursor: crosshair;
+}
+
+.canvas-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  font-size: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* ── right panel ───────────────────────────────────────────────────────────── */
+.right-panel {
+  width: 270px;
+  border-left: 1px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.panel-section {
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-section:last-child {
+  border-bottom: none;
+}
+
+.section-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+/* ── distance table ────────────────────────────────────────────────────────── */
+.dist-table {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.dist-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 7px;
+  background: var(--bg);
+  border-radius: 3px;
+  font-size: 11px;
+  border: 1px solid transparent;
+}
+
+.dist-row.updated {
+  border-color: var(--green);
+}
+
+.dist-node {
+  color: var(--text-primary);
+}
+
+.dist-node.start {
+  color: var(--start-node);
+}
+
+.dist-val {
+  color: var(--text-muted);
+}
+
+.dist-val.finite {
+  color: var(--green);
+}
+
+/* ── controls ──────────────────────────────────────────────────────────────── */
+.control-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.ctrl-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ctrl-select,
+.ctrl-input-num {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 4px 6px;
+  background: var(--node);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: var(--font);
+}
+
+.ctrl-range {
+  width: 100%;
+  margin-bottom: 10px;
+  accent-color: var(--node-stroke);
+}
+
+.progress-bar-wrap {
+  background: var(--bg);
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progress-bar-fill {
+  background: var(--node-stroke);
+  height: 100%;
+  transition: width 0.2s;
+}
+
+.step-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* ── buttons ───────────────────────────────────────────────────────────────── */
+.btn {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+
+.btn:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.btn-primary {
+  border-color: var(--node-stroke);
+  background: rgba(88, 166, 255, 0.13);
+  color: var(--node-stroke);
+}
+
+.btn-danger {
+  color: var(--red);
+  border-color: var(--border);
+}
+
+.btn-highlight {
+  border-color: var(--highlight);
+  background: rgba(163,113,247,0.13);
+  color: var(--highlight);
+}
+
+.btn-full {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+/* ── legend ────────────────────────────────────────────────────────────────── */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── log ───────────────────────────────────────────────────────────────────── */
+.log-section {
+  flex: 1;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.log-current {
+  padding: 6px 8px;
+  background: #1f3a5f;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--node-stroke);
+  border: 1px solid rgba(88,166,255,0.2);
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+
+.log-history {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 2px 4px;
+}
+
+/* ── negative cycle banner ─────────────────────────────────────────────────── */
+.neg-cycle-banner {
+  padding: 8px 12px;
+  background: rgba(248, 81, 73, 0.15);
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--red);
+  margin-bottom: 8px;
+}
+
+/* ── mst cost badge ────────────────────────────────────────────────────────── */
+.mst-cost {
+  padding: 6px 10px;
+  background: rgba(63,185,80,0.1);
+  border: 1px solid rgba(63,185,80,0.4);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--green);
+  text-align: center;
+  margin-bottom: 8px;
+}
